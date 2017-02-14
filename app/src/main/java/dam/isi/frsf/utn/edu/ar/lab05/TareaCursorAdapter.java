@@ -13,12 +13,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import dam.isi.frsf.utn.edu.ar.lab05.dao.ProyectoDAO;
 import dam.isi.frsf.utn.edu.ar.lab05.dao.ProyectoDBMetadata;
+import dam.isi.frsf.utn.edu.ar.lab05.modelo.Tarea;
 
 /**
  * Created by mdominguez on 06/10/16.
@@ -27,6 +33,8 @@ public class TareaCursorAdapter extends CursorAdapter {
     private LayoutInflater inflador;
     private ProyectoDAO myDao;
     private Context contexto;
+
+    private Map<Integer, Long> startTimes = new HashMap<>();
 
     public TareaCursorAdapter(Context contexto, Cursor c, ProyectoDAO dao) {
         super(contexto, c, false);
@@ -99,6 +107,20 @@ public class TareaCursorAdapter extends CursorAdapter {
                 backGroundUpdate.start();
             }
         });
+
+        btnEstado.setTag(cursor.getInt(cursor.getColumnIndex("_id")));
+        btnEstado.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                final Integer idTarea = (Integer) buttonView.getTag();
+                if(isChecked) startTarea(idTarea);
+                else {
+                    int elapsedMinutes =  stopTarea(idTarea);
+                    Toast.makeText(context, "Tarea detenida. " + elapsedMinutes + " minutos de trabajo contabilizados", Toast.LENGTH_LONG).show();
+                    handlerRefresh.sendEmptyMessage(1);
+                }
+            }
+        });
     }
 
     Handler handlerRefresh = new Handler(Looper.getMainLooper()) {
@@ -107,4 +129,23 @@ public class TareaCursorAdapter extends CursorAdapter {
             TareaCursorAdapter.this.changeCursor(myDao.listaTareas(1));
         }
     };
+
+    void startTarea(Integer idTarea) {
+        long startTime = System.currentTimeMillis();
+        startTimes.put(idTarea, startTime);
+    }
+
+    int stopTarea(Integer idTarea) {
+        long startTime = startTimes.remove(idTarea);
+
+        int elapsedMinutes = (int) (System.currentTimeMillis() - startTime)/1000/5; //5 real seconds = 1 'elapsed' minute, as per the assignment
+
+        Tarea tarea = myDao.getTarea(idTarea);
+
+        tarea.addMinutosTrabajados(elapsedMinutes);
+
+        myDao.actualizarTarea(tarea);
+
+        return elapsedMinutes;
+    }
 }

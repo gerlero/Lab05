@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.List;
@@ -78,6 +79,23 @@ public class ProyectoDAO {
 
     public void actualizarTarea(Tarea t){
 
+        final String table = ProyectoDBMetadata.TABLA_TAREAS;
+        final ContentValues values = new ContentValues();
+
+        values.put(ProyectoDBMetadata.TablaTareasMetadata.TAREA, t.getDescripcion());
+        values.put(ProyectoDBMetadata.TablaTareasMetadata.HORAS_PLANIFICADAS, t.getHorasEstimadas());
+        values.put(ProyectoDBMetadata.TablaTareasMetadata.MINUTOS_TRABAJADOS, t.getMinutosTrabajados());
+        values.put(ProyectoDBMetadata.TablaTareasMetadata.FINALIZADA, t.getFinalizada());
+        //values.put(ProyectoDBMetadata.TablaTareasMetadata.PROYECTO, t.getProyecto().getId());
+        //values.put(ProyectoDBMetadata.TablaTareasMetadata.PRIORIDAD, t.getPrioridad().getId());
+        //values.put(ProyectoDBMetadata.TablaTareasMetadata.RESPONSABLE, t.getResponsable().getId());
+
+        final String whereClause = ProyectoDBMetadata.TablaTareasMetadata._ID + "=?";
+        final String[] whereArgs = { t.getId().toString() };
+
+        open(true);
+        db.update(table, values, whereClause, whereArgs);
+        close();
     }
 
     public void borrarTarea(Tarea t){
@@ -108,4 +126,41 @@ public class ProyectoDAO {
     }
 
 
+    public @Nullable Tarea getTarea(Integer idTarea) {
+
+
+        final String table = ProyectoDBMetadata.TABLA_TAREAS;
+        final String[] columns = {
+                ProyectoDBMetadata.TablaTareasMetadata.TAREA,
+                ProyectoDBMetadata.TablaTareasMetadata.HORAS_PLANIFICADAS,
+                ProyectoDBMetadata.TablaTareasMetadata.MINUTOS_TRABAJADOS,
+                ProyectoDBMetadata.TablaTareasMetadata.FINALIZADA,
+                ProyectoDBMetadata.TablaTareasMetadata.PROYECTO,
+                ProyectoDBMetadata.TablaTareasMetadata.PRIORIDAD,
+                ProyectoDBMetadata.TablaTareasMetadata.RESPONSABLE
+        };
+
+        final String selection = ProyectoDBMetadata.TablaTareasMetadata._ID + "=?";
+        final String[] selectionArgs = { idTarea.toString() };
+
+
+        open(false);
+        Cursor cursor = db.query(table, columns, selection, selectionArgs, null, null, null);
+
+        boolean hasFirst = cursor.moveToFirst();
+        if(!hasFirst) return null;
+
+        Tarea ret = new Tarea(idTarea);
+        ret.setDescripcion(cursor.getString(0));
+        ret.setHorasEstimadas(cursor.getInt(1));
+        ret.setMinutosTrabajados(cursor.getInt(2));
+        ret.setFinalizada((cursor.getInt(3) == 1));
+        //ret.setProyecto(...)
+        //ret.setPrioridad(...)
+        //ret.setResponsable(...)
+
+        close();
+
+        return ret;
+    }
 }

@@ -16,7 +16,8 @@ public class Tarea {
     private Prioridad prioridad;
     private Usuario responsable;
 
-    public Tarea() {
+    public Tarea(Integer id) {
+        this.id = id;
     }
 
     public Tarea(Integer id, Integer horasEstimadas, Integer minutosTrabajados, Boolean finalizada, Proyecto proyecto, Prioridad prioridad, Usuario responsable) {
@@ -52,6 +53,10 @@ public class Tarea {
 
     public void setMinutosTrabajados(Integer minutosTrabajados) {
         this.minutosTrabajados = minutosTrabajados;
+    }
+
+    public void addMinutosTrabajados(int minutosTrabajados) {
+        this.minutosTrabajados += minutosTrabajados;
     }
 
     public String getDescripcion() {

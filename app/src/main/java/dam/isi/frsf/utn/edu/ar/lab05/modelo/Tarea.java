@@ -16,12 +16,11 @@ public class Tarea {
     private Prioridad prioridad;
     private Usuario responsable;
 
-    public Tarea(Integer id) {
-        this.id = id;
-    }
+    public Tarea() {}
 
-    public Tarea(Integer id, Integer horasEstimadas, Integer minutosTrabajados, Boolean finalizada, Proyecto proyecto, Prioridad prioridad, Usuario responsable) {
+    public Tarea(Integer id, String descripcion, Integer horasEstimadas, Integer minutosTrabajados, Boolean finalizada, Proyecto proyecto, Prioridad prioridad, Usuario responsable) {
         this.id = id;
+        this.descripcion = descripcion;
         this.horasEstimadas = horasEstimadas;
         this.minutosTrabajados = minutosTrabajados;
         this.finalizada = finalizada;

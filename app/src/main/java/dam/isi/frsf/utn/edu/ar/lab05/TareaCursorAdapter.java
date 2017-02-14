@@ -122,9 +122,9 @@ public class TareaCursorAdapter extends CursorAdapter {
                         @Override
                         public void run() {
                             Log.d("LAB05-MAIN", "detener tarea : --- " + idTarea);
-                            Tarea tarea = myDao.getTarea(idTarea);
+                            Tarea tarea = myDao.obtenerTarea(idTarea);
                             tarea.addMinutosTrabajados(elapsedMinutes);
-                            myDao.actualizarTarea(tarea);
+                            myDao.guardarTarea(tarea);
                             handlerRefresh.sendEmptyMessage(1);
                         }
                     });

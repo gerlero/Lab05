@@ -115,9 +115,20 @@ public class TareaCursorAdapter extends CursorAdapter {
                 final Integer idTarea = (Integer) buttonView.getTag();
                 if(isChecked) startTarea(idTarea);
                 else {
-                    int elapsedMinutes =  stopTarea(idTarea);
+                    final int elapsedMinutes =  stopTarea(idTarea);
                     Toast.makeText(context, "Tarea detenida. " + elapsedMinutes + " minutos de trabajo contabilizados", Toast.LENGTH_LONG).show();
                     handlerRefresh.sendEmptyMessage(1);
+                    Thread backGroundUpdate = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d("LAB05-MAIN", "detener tarea : --- " + idTarea);
+                            Tarea tarea = myDao.getTarea(idTarea);
+                            tarea.addMinutosTrabajados(elapsedMinutes);
+                            myDao.actualizarTarea(tarea);
+                            handlerRefresh.sendEmptyMessage(1);
+                        }
+                    });
+                    backGroundUpdate.start();
                 }
             }
         });
@@ -139,12 +150,6 @@ public class TareaCursorAdapter extends CursorAdapter {
         long startTime = startTimes.remove(idTarea);
 
         int elapsedMinutes = (int) (System.currentTimeMillis() - startTime)/1000/5; //5 real seconds = 1 'elapsed' minute, as per the assignment
-
-        Tarea tarea = myDao.getTarea(idTarea);
-
-        tarea.addMinutosTrabajados(elapsedMinutes);
-
-        myDao.actualizarTarea(tarea);
 
         return elapsedMinutes;
     }
